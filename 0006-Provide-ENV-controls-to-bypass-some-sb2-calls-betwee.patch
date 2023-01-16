@@ -216,11 +216,27 @@ index f389c60615f..d5763b8aa1a 100644
          // Whatever happens after the fork is almost for sure going to touch or
          // look at the environment in one way or another (PATH in `execvp` or
          // accessing the `environ` pointer ourselves). Make sure no other thread
-@@ -135,7 +202,36 @@ impl Command {
+@@ -54,7 +125,7 @@
+             match result {
+                 0 => {
+                     mem::forget(env_lock);
+-                    drop(input);
++                    self.unwrap_drop(input);
+                     let Err(err) = self.do_exec(theirs, envp.as_ref());
+                     let errno = err.raw_os_error().unwrap_or(libc::EINVAL) as u32;
+                     let errno = errno.to_be_bytes();
+@@ -135,7 +202,43 @@ impl Command {
              Err(e) => e,
          }
      }
 -
++    fn unwrap_drop(&mut self, fh: sys::unix::pipe::AnonPipe) {
++	// drop() simply calls libc::close(fh.fd)
++	match self.close {
++	    Some(real_close) => { (real_close)(fh.fd().raw()); },
++	    None => { drop(fh); }
++	}
++    }
 +    fn unwrap_dup2(&mut self, src: c_int, dst: c_int) -> c_int {
 +	match self.dup2 {
 +	    Some(real_dup2) => { (real_dup2)(src, dst) },
