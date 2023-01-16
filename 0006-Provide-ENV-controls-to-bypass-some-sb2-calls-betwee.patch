@@ -157,7 +157,7 @@ index f389c60615f..d5763b8aa1a 100644
 +	// At this point self.program is the real program. argv[0] is
 +	// now a clone() of program.
 +
-+	let libc_h = unsafe { libc::dlopen("libc.so.6\0".as_ptr() as *const c_char,
++	let libc_h = unsafe { libc::dlopen("libc.so\0".as_ptr() as *const c_char,
 +					   libc::RTLD_LAZY) };
 +
 +	match getenv(&OsString::from("SB2_RUST_EXECVP_SHIM"))? {
